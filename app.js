@@ -8,11 +8,13 @@ var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 var config = require('./config')();
-var mongo = require('mongodb');
+var mongo = require('mongojs');
 var mongoUri = process.env.MONGOLAB_URI ||
   process.env.MONGOHQ_URL ||
   'mongodb://localhost/mydb';
 var app = express();
+
+var Beer = require('./controllers/Beer');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -35,13 +37,16 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 
-
+/*
 mongo.Db.connect(mongoUri, function (err, db) {
   db.collection('mydocs', function(er, collection) {
     collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {
     });
   });
 });
+*/
+
+mongo.connect("expressTestApp",["beers"]);
 
 http.createServer(app).listen(process.env.PORT || config.port, function(){
     console.log('Express server listening on port ' + config.port);
