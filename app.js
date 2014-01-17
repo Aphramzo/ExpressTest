@@ -9,7 +9,10 @@ var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 var config = require('./config')();
-var MongoClient = require('mongodb').MongoClient;
+var mongo = require('mongodb');
+var mongoUri = process.env.MONGOLAB_URI ||
+  process.env.MONGOHQ_URL ||
+  'mongodb://localhost/mydb';
 var app = express();
 
 // all environments
@@ -33,16 +36,13 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-MongoClient.connect('mongodb://127.0.0.1:27017/fastdelivery', function(err, db) {
-    if(err) {
-        console.log('Sorry, there is no mongo db server running.');
-    } else {
-        var attachDB = function(req, res, next) {
-            req.db = db;
-            next();
-        };
-        http.createServer(app).listen(config.port, function(){
-            console.log('Express server listening on port ' + config.port);
-        });
-    }
+mongo.Db.connect(mongoUri, function (err, db) {
+  db.collection('mydocs', function(er, collection) {
+    collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {
+    });
+  });
+});
+
+http.createServer(app).listen(config.port, function(){
+    console.log('Express server listening on port ' + config.port);
 });
